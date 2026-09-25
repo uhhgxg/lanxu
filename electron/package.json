@@ -1,0 +1,10 @@
+{
+  "name": "lanxu-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "澜序桌面端",
+  "main": "dist/main.cjs",
+  "author": "uhhgxg",
+  "license": "MIT",
+  "homepage": "https://github.com/uhhgxg/lanxu#readme"
+}
