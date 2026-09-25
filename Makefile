@@ -185,7 +185,7 @@ docker-pull: ## 拉取 GitHub Actions 发布的 Agent 镜像
 # ─── Shared Types ────────────────────────────────────────────
 
 sync-types: ## 同步 shared/ 下的类型定义到各子项目
-	@./scripts/sync-stream-event.sh
+	@bash ./scripts/sync-stream-event.sh
 
 # ─── Pi Runtime ──────────────────────────────────────────────
 
