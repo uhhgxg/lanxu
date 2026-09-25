@@ -80,7 +80,7 @@ _check-sync: ## (内部) 检测 shared/ 类型变更并同步
 _ensure-builtin-skills: ## (内部) 物化固定版本、Host/Container 共用的内置 Skills
 	@if ! node scripts/builtin-skill-catalog.mjs validate data/builtin-skills; then \
 	  echo "📚 固定版本内置 Skills 缺失，正在物化..."; \
-	  ./scripts/install-host-tools.sh skills; \
+	  bash ./scripts/install-host-tools.sh skills; \
 	else \
 	  echo "✅ 内置 Skills catalog 已就绪"; \
 	fi
@@ -148,8 +148,8 @@ status: ## 查看服务运行状态
 # ─── Quality ─────────────────────────────────────────────────
 
 typecheck: sync-types typecheck-backend typecheck-web typecheck-agent-runner ## 全量类型检查
-	@./scripts/check-stream-event-sync.sh
-	@./scripts/check-agent-runner-prompts.sh
+	@bash ./scripts/check-stream-event-sync.sh
+	@bash ./scripts/check-agent-runner-prompts.sh
 	@$(PKG) run docs:check
 
 typecheck-backend:
@@ -214,7 +214,7 @@ ensure-latest-sdk: ensure-latest-pi-runtime ## 兼容旧工作流名称；实际
 # ─── Setup ───────────────────────────────────────────────────
 
 install-host-tools: ## 安装宿主工具 + 刷新 Host/Container 共用的固定版本 builtin-skills Manifest 源
-	@./scripts/install-host-tools.sh
+	@bash ./scripts/install-host-tools.sh
 
 install: ## 安装全部依赖并编译 agent-runner
 	$(PKG) ci

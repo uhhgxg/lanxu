@@ -71,7 +71,7 @@ jobs:
       - name: Start candidate and probe Chromium over HTTP
         env:
           IMAGE_REF: ${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
-        run: ./scripts/smoke-agent-image.sh "$IMAGE_REF" "${{ matrix.arch }}"
+        run: bash ./scripts/smoke-agent-image.sh "$IMAGE_REF" "${{ matrix.arch }}"
 
       - name: Record verified digest
         env:
