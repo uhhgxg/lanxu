@@ -18,7 +18,7 @@ describe('frontend identity ownership', () => {
       }),
     ).toMatchObject({
       name: '代码审查员',
-      imageUrl: expect.stringContaining('icons/icon-192.png'),
+      imageUrl: expect.stringContaining('icons/workspace-mark.svg'),
       fallbackChar: '代',
     });
   });
@@ -26,7 +26,7 @@ describe('frontend identity ownership', () => {
   test('uses the branded avatar as the final global fallback', () => {
     expect(resolveAgentDisplayIdentity()).toMatchObject({
       name: '澜序',
-      imageUrl: expect.stringContaining('icons/icon-192.png'),
+      imageUrl: expect.stringContaining('icons/workspace-mark.svg'),
     });
   });
 

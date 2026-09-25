@@ -33,7 +33,7 @@ export function LogoLoading({ full, size = 64, label }: LogoLoadingProps) {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
       <img
-        src={`${APP_BASE}icons/icon-192.png`}
+        src={`${APP_BASE}icons/workspace-mark.svg`}
         alt="澜序"
         className="animate-pulse rounded-2xl"
         style={{ width: size, height: size }}

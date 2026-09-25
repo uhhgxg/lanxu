@@ -37,7 +37,7 @@ describe('product terminology', () => {
     const tools = read('web/src/components/chat/ToolActivityCard.tsx');
     const readme = read('README.md');
 
-    expect(login).toContain('Powered by Pi Agent Runtime');
+    expect(login).toContain('自托管智能体工作台');
     expect(streaming).toContain('子 Agent:');
     expect(workflow).toContain('个 Agent');
     expect(tools).toContain("case 'Agent':");
