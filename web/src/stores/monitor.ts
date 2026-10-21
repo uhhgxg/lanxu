@@ -22,6 +22,7 @@ export interface SystemStatus {
   agentOperations?: {
     generatedAt: string;
     providerPool?: {
+      enabled: boolean;
       strategy: 'round-robin' | 'weighted-round-robin' | 'failover';
       unhealthyThreshold: number;
       recoveryIntervalMs: number;

@@ -300,6 +300,7 @@ monitorRoutes.get('/status', authMiddleware, async (c) => {
   const providerNameMap = new Map(providers.map((p) => [p.id, p.name]));
   let providerPoolSummary:
     | {
+        enabled: boolean;
         strategy: ReturnType<typeof getBalancingConfig>['strategy'];
         unhealthyThreshold: number;
         recoveryIntervalMs: number;
@@ -328,6 +329,7 @@ monitorRoutes.get('/status', authMiddleware, async (c) => {
       name: providerNameMap.get(status.profileId) ?? status.profileId,
     }));
     providerPoolSummary = {
+      enabled: balancing.enabled,
       strategy: balancing.strategy,
       unhealthyThreshold: balancing.unhealthyThreshold,
       recoveryIntervalMs: balancing.recoveryIntervalMs,

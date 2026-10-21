@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth';
 import { useMonitorStore } from '@/stores/monitor';
 import type { RunContextSnapshot, RunContextStatus } from '@/types';
+import { UncertainDeliveryReview } from '@/components/operations/UncertainDeliveryReview';
 
 interface WorkspaceSummary {
   jid: string;
@@ -391,20 +392,26 @@ export function OperationsPage() {
                 label="ProviderPool"
                 value={
                   providerPool
-                    ? `${providerPool.healthyCount}/${providerPool.enabledCount} 健康`
+                    ? providerPool.enabled
+                      ? `${providerPool.healthyCount}/${providerPool.enabledCount} 健康`
+                      : '自动调度未启用'
                     : '受权限保护'
                 }
                 detail={
                   providerPool
-                    ? `${strategyLabel(providerPool.strategy)} · 连续失败阈值 ${providerPool.unhealthyThreshold}`
+                    ? providerPool.enabled
+                      ? `${strategyLabel(providerPool.strategy)} · 连续失败阈值 ${providerPool.unhealthyThreshold}`
+                      : '当前继承型 Agent 使用系统默认模型；固定绑定模型不受影响'
                     : '管理员可查看调度策略和健康状态'
                 }
                 tone={
                   !providerPool
                     ? 'restricted'
-                    : providerPool.healthyCount === providerPool.enabledCount
-                      ? 'ready'
-                      : 'attention'
+                    : !providerPool.enabled
+                      ? 'waiting'
+                      : providerPool.healthyCount === providerPool.enabledCount
+                        ? 'ready'
+                        : 'attention'
                 }
                 icon={GitBranch}
               />
@@ -430,6 +437,10 @@ export function OperationsPage() {
             </div>
           </div>
         </section>
+
+        {canManageSystem && (
+          <UncertainDeliveryReview onResolved={() => void loadStatus()} />
+        )}
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
           <section
@@ -584,7 +595,9 @@ export function OperationsPage() {
               summary="查看调度策略、连续失败、自动恢复窗口以及活跃 Session 的粘性绑定。"
               evidence={
                 providerPool
-                  ? `${strategyLabel(providerPool.strategy)} · ${providerPool.healthyCount}/${providerPool.enabledCount} healthy`
+                  ? providerPool.enabled
+                    ? `${strategyLabel(providerPool.strategy)} · ${providerPool.healthyCount}/${providerPool.enabledCount} healthy`
+                    : '自动调度未启用，当前使用系统默认模型'
                   : '管理员权限下展示 ProviderPool 运行证据'
               }
               status={providerPool ? '可观测' : '权限受限'}
