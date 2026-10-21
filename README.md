@@ -39,23 +39,23 @@
 
 工作台围绕 `Agent → Workspace → Runtime Session` 组织信息。左侧导航提供工作台、智能体、能力库、任务、用量、账单和设置入口；进入工作台后，可以在同一个界面中切换 Agent、Workspace 和对话上下文。
 
-下面是当前桌面端工作台的实际界面：
+下面是当前版本工作台的实际界面：
 
 <p align="center">
   <img src="docs/screenshots/workbench.png" alt="澜序智能体工作台" width="900" />
 </p>
 
 <p align="center">
-  <em>工作台：在同一个窗口中管理 Agent、Workspace、Session 与对话。</em>
+  <em>工作台：在同一个窗口中管理 Agent、Workspace、Session 与多渠道对话。</em>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/capabilities.png" alt="澜序能力库" width="49%" />
-  <img src="docs/screenshots/settings-models.png" alt="澜序模型配置" width="49%" />
+  <img src="docs/screenshots/workspace-memory.png" alt="澜序工作区记忆" width="49%" />
+  <img src="docs/screenshots/operations.png" alt="澜序 Agent 运行观测" width="49%" />
 </p>
 
 <p align="center">
-  <em>能力库与模型配置：把 Skills、MCP、Plugins 和 Provider 配置放在清晰的管理边界内。</em>
+  <em>工作区记忆与运行观测：沉淀可复用知识，并把 Agent Turn 从 Workspace 到消息投递串成可检查的证据链。</em>
 </p>
 
 澜序图标同时用于 Web/PWA、Electron 窗口和安装包资源：
