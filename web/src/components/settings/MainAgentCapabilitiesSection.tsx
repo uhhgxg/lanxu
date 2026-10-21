@@ -47,9 +47,6 @@ export function MainAgentCapabilitiesSection() {
   const modelConfigs = useAgentProfilesStore(
     (state) => state.modelConfigs ?? [],
   );
-  const defaultModelConfigId = useAgentProfilesStore(
-    (state) => state.defaultModelConfigId ?? null,
-  );
   const profilesLoading = useAgentProfilesStore((state) => state.loading);
   const loadProfiles = useAgentProfilesStore((state) => state.loadProfiles);
   const governance = useAgentProfilesStore((state) =>
@@ -271,10 +268,7 @@ export function MainAgentCapabilitiesSection() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="inherit">
-              跟随系统默认
-              {defaultModelConfigId
-                ? `（${modelConfigs.find((item) => item.id === defaultModelConfigId)?.name ?? '当前默认'}）`
-                : '（尚未配置）'}
+              不固定模型（跟随系统设置）
             </SelectItem>
             {modelConfigs.map((model) => (
               <SelectItem key={model.id} value={model.id}>
@@ -286,8 +280,8 @@ export function MainAgentCapabilitiesSection() {
           </SelectContent>
         </Select>
         <p className="text-[11px] leading-5 text-muted-foreground">
-          Home
-          工作区、主会话、独立会话与定时任务都会继承该选择。未启用的配置仍可在这里显式使用。
+          选择“不固定模型”时，关闭自动调度会使用系统默认模型，开启自动调度后会由 ProviderPool
+          在已启用的模型配置之间选择。选择具体模型后则固定使用它。Home 工作区、主会话、独立会话与定时任务都会继承该选择。
         </p>
       </div>
 

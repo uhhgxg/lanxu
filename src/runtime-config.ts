@@ -418,12 +418,17 @@ interface ClaudeStoredProfileResolved {
 // ─── V5 模型配置（每项都是一套完整 Provider 运行环境）──────────
 
 export interface BalancingConfig {
+  /** Whether Agents that inherit the system model should use ProviderPool. */
+  enabled: boolean;
   strategy: 'round-robin' | 'weighted-round-robin' | 'failover';
   unhealthyThreshold: number;
   recoveryIntervalMs: number;
 }
 
 const DEFAULT_BALANCING_CONFIG: BalancingConfig = {
+  // Keep existing installations on the stable system-default path until an
+  // administrator explicitly enables automatic provider scheduling.
+  enabled: false,
   strategy: 'round-robin',
   unhealthyThreshold: 3,
   recoveryIntervalMs: 300_000,
@@ -1229,6 +1234,7 @@ function migrateV3toV4(v3: ClaudeStoredStateV3Resolved): {
       const poolContent = fs.readFileSync(POOL_CONFIG_FILE, 'utf-8');
       const pool = JSON.parse(poolContent) as Record<string, unknown>;
       if (pool.version === 1 && pool.mode === 'pool') {
+        balancing.enabled = true;
         const members = pool.members as Array<{
           profileId: string;
           weight: number;
@@ -1308,6 +1314,7 @@ function readStoredStateV4(): {
           v5.defaultProviderId,
         ),
         balancing: {
+          enabled: v5.balancing?.enabled ?? DEFAULT_BALANCING_CONFIG.enabled,
           strategy: v5.balancing?.strategy || DEFAULT_BALANCING_CONFIG.strategy,
           unhealthyThreshold:
             v5.balancing?.unhealthyThreshold ??
@@ -1326,6 +1333,7 @@ function readStoredStateV4(): {
         providers,
         defaultProviderId: resolveDefaultProviderId(providers),
         balancing: {
+          enabled: v4.balancing?.enabled ?? DEFAULT_BALANCING_CONFIG.enabled,
           strategy: v4.balancing?.strategy || DEFAULT_BALANCING_CONFIG.strategy,
           unhealthyThreshold:
             v4.balancing?.unhealthyThreshold ??

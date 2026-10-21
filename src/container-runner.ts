@@ -773,7 +773,9 @@ export function willClearSessionOnProviderSwitch(
   agentId?: string | null,
   modelConfigId?: string | null,
 ): boolean {
-  const selectedModelConfigId = modelConfigId ?? getDefaultProviderId();
+  const balancing = getBalancingConfig();
+  const selectedModelConfigId =
+    modelConfigId ?? (balancing.enabled ? null : getDefaultProviderId());
   const boundId = getSessionProviderId(groupFolder, agentId);
   if (selectedModelConfigId) {
     return !!boundId && boundId !== selectedModelConfigId;
@@ -807,7 +809,6 @@ export function willClearSessionOnProviderSwitch(
   // Multiple providers: sticky reuse only when the binding is still healthy.
   // Unhealthy binding falls through to pool selection, which prefers a
   // different healthy provider → reset.
-  const balancing = getBalancingConfig();
   providerPool.refreshFromConfig(enabledProviders, balancing);
   return !providerPool.getHealthStatus(boundId).healthy;
 }
@@ -834,7 +835,9 @@ export function trySelectPoolProvider(
   previousProviderId?: string;
   resetSession?: boolean;
 } | null {
-  const selectedModelConfigId = modelConfigId ?? getDefaultProviderId();
+  const balancing = getBalancingConfig();
+  const selectedModelConfigId =
+    modelConfigId ?? (balancing.enabled ? null : getDefaultProviderId());
   const existingBoundId = getSessionProviderId(groupFolder, agentId);
   if (selectedModelConfigId) {
     // Agent/default selection is authoritative. Workspace credentials must
@@ -850,7 +853,7 @@ export function trySelectPoolProvider(
         `agent_model_unavailable: model configuration ${selectedModelConfigId} is missing`,
       );
     }
-    providerPool.refreshFromConfig(providers, getBalancingConfig());
+    providerPool.refreshFromConfig(providers, balancing);
     const resolved = resolveProviderById(selected.id);
     providerPool.acquireSession(selected.id);
     setSessionProviderId(groupFolder, agentId, selected.id);
@@ -873,7 +876,6 @@ export function trySelectPoolProvider(
   // Refresh pool state from V4 config
   const enabledProviders = getEnabledProviders();
   if (enabledProviders.length === 0) return null;
-  const balancing = getBalancingConfig();
   providerPool.refreshFromConfig(enabledProviders, balancing);
   const boundId = existingBoundId;
 
@@ -1694,7 +1696,8 @@ export async function runContainerAgent(
   const selectedProfileId = poolResult?.profileId ?? null;
   const resolvedProvider = poolResult?.resolved;
   const modelSelectionPinned = !!(
-    input.agentProfile?.modelConfigId ?? getDefaultProviderId()
+    input.agentProfile?.modelConfigId ??
+    (getBalancingConfig().enabled ? null : getDefaultProviderId())
   );
   let providerFailureReported = false;
   let providerFailureTerminal: boolean | undefined;
@@ -2524,7 +2527,8 @@ export async function runHostAgent(
   );
   const hostSelectedProfileId = hostPoolResult?.profileId ?? null;
   const hostModelSelectionPinned = !!(
-    input.agentProfile?.modelConfigId ?? getDefaultProviderId()
+    input.agentProfile?.modelConfigId ??
+    (getBalancingConfig().enabled ? null : getDefaultProviderId())
   );
   const globalConfig =
     hostPoolResult?.resolved.config ?? getClaudeProviderConfig();
@@ -3119,12 +3123,14 @@ export async function runAgentWithModelFallback(
   onOutput?: (output: ContainerOutput) => Promise<void>,
   ownerHomeFolder?: string,
 ): Promise<ContainerOutput> {
-  // A top-level Agent owns exactly one complete model configuration. Retrying
-  // through other enabled configurations would violate that contract and can
-  // send a Workspace to a different gateway or official subscription. Keep
-  // the old pool fallback only for an unmigrated/no-model installation.
+  // An explicitly model-bound Agent owns exactly one complete model
+  // configuration. In automatic ProviderPool mode, an inherited Agent is
+  // intentionally allowed to retry the same immutable scheduled prompt on
+  // another healthy provider.
+  const balancing = getBalancingConfig();
   const selectedModelConfigId =
-    input.agentProfile?.modelConfigId ?? getDefaultProviderId();
+    input.agentProfile?.modelConfigId ??
+    (balancing.enabled ? null : getDefaultProviderId());
   const maxAttempts = selectedModelConfigId
     ? 1
     : Math.max(1, getEnabledProviders().length);

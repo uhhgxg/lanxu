@@ -1229,6 +1229,7 @@ export const UnifiedProviderSecretsSchema = z
   );
 
 export const BalancingConfigSchema = z.object({
+  enabled: z.boolean().optional(),
   strategy: z
     .enum(['round-robin', 'weighted-round-robin', 'failover'])
     .optional(),

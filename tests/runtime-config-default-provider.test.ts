@@ -69,6 +69,15 @@ describe('default model configuration', () => {
     expect(runtimeConfig.getDefaultProviderId()).toBe(first.id);
     runtimeConfig.setDefaultProvider(second.id);
     expect(runtimeConfig.getDefaultProviderId()).toBe(second.id);
+    expect(runtimeConfig.getBalancingConfig().enabled).toBe(false);
+    runtimeConfig.saveBalancingConfig({ enabled: true, strategy: 'failover' });
+    const pooled = trySelectPoolProvider(
+      'automatic-pool-workspace',
+      null,
+      null,
+    );
+    expect(pooled?.profileId).toBe(first.id);
+    expect(runtimeConfig.getBalancingConfig().enabled).toBe(true);
     expect(runtimeConfig.getClaudeProviderConfig()).toMatchObject({
       anthropicBaseUrl: 'https://gateway.example.test',
       anthropicAuthToken: 'gateway-token',

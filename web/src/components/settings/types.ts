@@ -36,6 +36,7 @@ export interface ProviderWithHealth extends UnifiedProviderPublic {
 }
 
 export interface BalancingConfig {
+  enabled: boolean;
   strategy: 'round-robin' | 'weighted-round-robin' | 'failover';
   unhealthyThreshold: number;
   recoveryIntervalMs: number;

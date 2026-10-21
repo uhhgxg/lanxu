@@ -210,7 +210,6 @@ export function AgentProfilesPage() {
   const {
     profiles,
     modelConfigs = [],
-    defaultModelConfigId = null,
     loading,
     profilesError,
     loadProfiles,
@@ -1536,10 +1535,7 @@ export function AgentProfilesPage() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="inherit">
-                              跟随系统默认
-                              {defaultModelConfigId
-                                ? `（${modelConfigs.find((item) => item.id === defaultModelConfigId)?.name ?? '当前默认'}）`
-                                : '（尚未配置）'}
+                              不固定模型（跟随系统设置）
                             </SelectItem>
                             {modelConfigs.map((model) => (
                               <SelectItem key={model.id} value={model.id}>
@@ -1553,7 +1549,9 @@ export function AgentProfilesPage() {
                           </SelectContent>
                         </Select>
                         <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
-                          该智能体所属的所有工作区、会话和定时任务都会使用这里解析出的完整模型网关环境。未启用的配置不会参与系统自动选择，但仍可由智能体显式使用。
+                          选择“不固定模型”时，关闭自动调度会使用系统默认模型，开启自动调度后会由 ProviderPool
+                          在已启用的模型配置之间选择。选择下面的具体模型后，该智能体会固定使用它，不参加自动调度。
+                          该选择会应用到所属工作区、会话和定时任务；未启用的配置仍可被显式绑定。
                         </p>
                       </div>
                       <div>
@@ -1855,7 +1853,7 @@ export function AgentProfilesPage() {
                           label="模型配置"
                           value={
                             modelConfigId === 'inherit'
-                              ? `跟随系统默认${defaultModelConfigId ? `：${modelConfigs.find((item) => item.id === defaultModelConfigId)?.name ?? '当前默认'}` : ''}`
+                              ? '不固定模型（跟随系统设置）'
                               : (modelConfigs.find(
                                   (item) => item.id === modelConfigId,
                                 )?.name ?? '不可用模型配置')

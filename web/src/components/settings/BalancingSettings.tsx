@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import type { BalancingConfig } from './types';
 
 interface BalancingSettingsProps {
@@ -31,12 +32,16 @@ export function BalancingSettings({
       >
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">负载均衡设置</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
-            {balancing.strategy === 'round-robin'
-              ? '轮询'
-              : balancing.strategy === 'weighted-round-robin'
-                ? '加权轮询'
-                : '故障转移'}
+          <span
+            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${balancing.enabled ? 'bg-teal-100 text-teal-800' : 'bg-muted text-muted-foreground'}`}
+          >
+            {balancing.enabled
+              ? balancing.strategy === 'round-robin'
+                ? '轮询'
+                : balancing.strategy === 'weighted-round-robin'
+                  ? '加权轮询'
+                  : '故障转移'
+              : '未启用'}
           </span>
         </div>
         {expanded ? (
@@ -48,8 +53,25 @@ export function BalancingSettings({
 
       {expanded && (
         <div className="p-4 space-y-4">
+          <div className="flex items-center justify-between gap-4 rounded-md border border-border bg-muted/20 px-3 py-3">
+            <div>
+              <div className="text-sm font-medium">启用自动调度</div>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                开启后，未指定固定模型的 Agent
+                会在启用的模型配置之间自动分配；固定绑定模型的 Agent 不受影响。
+              </p>
+            </div>
+            <Switch
+              checked={balancing.enabled}
+              disabled={disabled}
+              onCheckedChange={(enabled) => onChange({ enabled })}
+              aria-label="启用 ProviderPool 自动调度"
+            />
+          </div>
+
           <div className="text-xs text-muted-foreground mb-2">
-            启用多个提供商后，系统会根据以下策略自动分配会话请求。
+            当前设置会在保存后用于新启动的
+            Runner；已有会话会保持会话粘性，避免中途更换模型破坏上下文。
           </div>
 
           {/* 策略选择 */}
@@ -58,7 +80,7 @@ export function BalancingSettings({
             <select
               className="w-full border border-border rounded-md px-3 py-1.5 text-sm bg-background"
               value={balancing.strategy}
-              disabled={disabled}
+              disabled={disabled || !balancing.enabled}
               onChange={(e) =>
                 onChange({
                   strategy: e.target.value as BalancingConfig['strategy'],
@@ -96,7 +118,7 @@ export function BalancingSettings({
                 min={1}
                 max={20}
                 value={balancing.unhealthyThreshold}
-                disabled={disabled}
+                disabled={disabled || !balancing.enabled}
                 onChange={(e) =>
                   onChange({
                     unhealthyThreshold: Math.max(
@@ -120,7 +142,7 @@ export function BalancingSettings({
                 min={30}
                 max={3600}
                 value={Math.round(balancing.recoveryIntervalMs / 1000)}
-                disabled={disabled}
+                disabled={disabled || !balancing.enabled}
                 onChange={(e) =>
                   onChange({
                     recoveryIntervalMs:

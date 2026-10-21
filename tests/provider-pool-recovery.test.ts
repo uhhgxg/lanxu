@@ -15,6 +15,7 @@ describe('provider pool recovery state', () => {
           { id: 'glm', enabled: true, weight: 1 },
         ],
         {
+          enabled: true,
           strategy: 'failover',
           unhealthyThreshold: 1,
           recoveryIntervalMs: 60_000,
@@ -35,6 +36,7 @@ describe('provider pool recovery state', () => {
   test('failure disposition sees providers added after one-time selection', () => {
     const pool = new ProviderPool();
     const balancing = {
+      enabled: true,
       strategy: 'failover' as const,
       unhealthyThreshold: 1,
       recoveryIntervalMs: 60_000,

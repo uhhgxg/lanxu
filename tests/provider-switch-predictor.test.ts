@@ -35,6 +35,7 @@ vi.mock('../src/runtime-config.js', async () => {
     getDefaultProviderId: () => mocks.defaultProviderId,
     getContainerEnvConfig: () => mocks.envOverride,
     getBalancingConfig: () => ({
+      enabled: false,
       strategy: 'round-robin' as const,
       unhealthyThreshold: 3,
       recoveryIntervalMs: 300_000,
@@ -58,6 +59,7 @@ const { providerPool } = await import('../src/provider-pool.ts');
 function setProviders(...ids: string[]) {
   mocks.enabledProviders = ids.map((id) => ({ id, enabled: true, weight: 1 }));
   providerPool.refreshFromConfig(mocks.enabledProviders, {
+    enabled: true,
     strategy: 'round-robin',
     unhealthyThreshold: 3,
     recoveryIntervalMs: 300_000,
