@@ -3,6 +3,7 @@
  */
 
 import crypto from 'crypto';
+import { checkWorkspaceQuota } from './workspace-quota.js';
 import {
   batchAssignPlan as dbBatchAssignPlan,
   getBillingPlan,
@@ -218,9 +219,20 @@ export function checkBillingAccess(
 export function checkBillingAccessFresh(
   userId: string,
   userRole: string,
+  workspaceFolder?: string,
 ): BillingAccessResult {
   const result = _checkBillingAccessInternal(userId, userRole);
   _accessCacheSet(userId, result);
+  if (result.allowed && workspaceFolder && userRole !== 'admin') {
+    const workspace = checkWorkspaceQuota(workspaceFolder);
+    if (!workspace.allowed)
+      return {
+        ...result,
+        allowed: false,
+        blockType: 'quota_exceeded',
+        reason: workspace.reason,
+      };
+  }
   return result;
 }
 

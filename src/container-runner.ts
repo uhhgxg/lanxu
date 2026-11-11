@@ -16,6 +16,7 @@ import { randomUUID } from 'node:crypto';
 
 import { CONTAINER_IMAGE, DATA_DIR, GROUPS_DIR, TIMEZONE } from './config.js';
 import { logger } from './logger.js';
+import { checkWorkspaceQuota } from './workspace-quota.js';
 import {
   buildEffectiveMcpManifest,
   loadPluginMcpDefinitions,
@@ -1681,6 +1682,18 @@ export async function runContainerAgent(
   onOutput?: (output: ContainerOutput) => Promise<void>,
   ownerHomeFolder?: string,
 ): Promise<ContainerOutput> {
+  if (
+    process.env.MINICLAW_WORKSPACE_QUOTAS_FILE &&
+    (!group.created_by || getUserById(group.created_by)?.role !== 'admin')
+  ) {
+    const quota = checkWorkspaceQuota(group.folder);
+    if (!quota.allowed)
+      return {
+        status: 'error',
+        result: null,
+        error: `workspace_quota_exceeded: ${quota.reason}`,
+      };
+  }
   const startTime = Date.now();
   const sessionAgentId = input.sessionAgentId ?? input.agentId;
 
@@ -2306,6 +2319,18 @@ export async function runHostAgent(
   onOutput?: (output: ContainerOutput) => Promise<void>,
   ownerHomeFolder?: string,
 ): Promise<ContainerOutput> {
+  if (
+    process.env.MINICLAW_WORKSPACE_QUOTAS_FILE &&
+    (!group.created_by || getUserById(group.created_by)?.role !== 'admin')
+  ) {
+    const quota = checkWorkspaceQuota(group.folder);
+    if (!quota.allowed)
+      return {
+        status: 'error',
+        result: null,
+        error: `workspace_quota_exceeded: ${quota.reason}`,
+      };
+  }
   const startTime = Date.now();
   const sessionAgentId = input.sessionAgentId ?? input.agentId;
   const setupInstallHint = 'npm --prefix container/agent-runner install';

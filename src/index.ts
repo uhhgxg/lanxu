@@ -7012,6 +7012,7 @@ async function processGroupMessages(chatJid: string): Promise<boolean> {
       const accessResult = checkBillingAccessFresh(
         effectiveGroup.created_by,
         owner.role,
+        effectiveGroup.folder,
       );
       if (!accessResult.allowed) {
         const sysMsg = formatBillingAccessDeniedMessage(accessResult);
@@ -7667,6 +7668,7 @@ async function processGroupMessages(chatJid: string): Promise<boolean> {
                     const freshAccess = checkBillingAccessFresh(
                       ownerId,
                       owner.role,
+                      effectiveGroup.folder,
                     );
                     if (freshAccess.usage) {
                       broadcastBillingUpdate(ownerId, { ...freshAccess });
@@ -16360,16 +16362,14 @@ async function processAgentConversation(
       runtimeAgentId: agentId,
       runtimeAgentKind: agent.kind,
     });
-    const miniclawOwnerProfileEnabled = isMiniclawOwnerProfileRuntimeEligible(
-      {
-        group: effectiveGroup,
-        profile: agentProfile,
-        turnId: lastProcessed.id,
-        isScheduledTask: Boolean(lastProcessed.task_id),
-        runtimeAgentId: agentId,
-        runtimeAgentKind: agent.kind,
-      },
-    );
+    const miniclawOwnerProfileEnabled = isMiniclawOwnerProfileRuntimeEligible({
+      group: effectiveGroup,
+      profile: agentProfile,
+      turnId: lastProcessed.id,
+      isScheduledTask: Boolean(lastProcessed.task_id),
+      runtimeAgentId: agentId,
+      runtimeAgentKind: agent.kind,
+    });
     const containerInput: ContainerInput = {
       prompt,
       sessionId,
@@ -17100,6 +17100,7 @@ async function startMessageLoop(): Promise<void> {
               const accessResult = checkBillingAccessFresh(
                 group.created_by,
                 owner.role,
+                group.folder,
               );
               if (!accessResult.allowed) {
                 logger.info(

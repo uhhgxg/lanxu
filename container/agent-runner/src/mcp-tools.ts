@@ -19,6 +19,10 @@ import {
 } from './types.js';
 import { signWorkspaceMemoryMutation } from './workspace-memory-auth.js';
 import {
+  KnowledgeReviewInput,
+  reviewKnowledgeReports,
+} from './knowledge-review.js';
+import {
   defineMcpTool as tool,
   type McpToolDefinition,
 } from './mcp-tool-types.js';
@@ -2813,5 +2817,17 @@ Use the skills panel in the UI to find the skill ID (directory name, e.g. "memor
     );
   }
 
+  tools.push(
+    tool(
+      'review_knowledge_reports',
+      'Validate structured retriever/analyst/reviewer deliveries. Missing roles or unsupported references require more evidence; conflicting explicit facts require human review. This tool never executes side effects or grants authorization.',
+      KnowledgeReviewInput,
+      async (args) => ({
+        content: [
+          { type: 'text', text: JSON.stringify(reviewKnowledgeReports(args)) },
+        ],
+      }),
+    ),
+  );
   return tools;
 }

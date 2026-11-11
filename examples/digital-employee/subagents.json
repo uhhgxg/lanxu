@@ -1,0 +1,7 @@
+{
+  "fallbackSubagent": "none",
+  "strictAgentFiles": true,
+  "disableDefaultAgents": true,
+  "maxConcurrent": 3,
+  "maxSubagentDepth": 1
+}

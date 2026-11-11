@@ -1035,6 +1035,7 @@ async function runTaskInner(
       const accessResult = checkBillingAccessFresh(
         workspaceOwnerId,
         owner.role,
+        task.group_folder,
       );
       if (!accessResult.allowed) {
         const reason = accessResult.reason || '当前账户不可用';
@@ -1673,7 +1674,11 @@ async function runScriptTaskInner(
     if (ownerId) {
       const owner = getUserById(ownerId);
       if (owner && owner.role !== 'admin') {
-        const accessResult = checkBillingAccessFresh(ownerId, owner.role);
+        const accessResult = checkBillingAccessFresh(
+          ownerId,
+          owner.role,
+          task.group_folder,
+        );
         if (!accessResult.allowed) {
           const reason = accessResult.reason || '当前账户不可用';
           logger.info(

@@ -11,6 +11,7 @@ import type {
   RuntimeSession,
 } from '../types.js';
 import { PiSubAgentAdapter } from './pi-subagents.js';
+import { enforcePiStartupBudget } from '../../pi-context-budget.js';
 
 function textFromMessage(message: unknown): string {
   if (!message || typeof message !== 'object') return '';
@@ -61,29 +62,9 @@ function mapPiEvent(
       if (update.type === 'thinking_delta') {
         return { type: 'thinking_delta', delta: update.delta, sessionId };
       }
-      if (update.type === 'toolcall_start') {
-        const toolCall = update.partial.content.find(
-          (item) => item.type === 'toolCall',
-        );
-        if (toolCall?.type === 'toolCall') {
-          return {
-            type: 'tool_start',
-            sessionId,
-            toolName: toolCall.name,
-            toolCallId: toolCall.id,
-            input: toolCall.arguments,
-          };
-        }
-      }
-      if (update.type === 'toolcall_end') {
-        return {
-          type: 'tool_end',
-          sessionId,
-          toolName: update.toolCall.name,
-          toolCallId: update.toolCall.id,
-          input: update.toolCall.arguments,
-        };
-      }
+      // A parsed tool call is intent, not execution. Only tool_execution_*
+      // events below define duration and lifecycle; merging both duplicates
+      // starts and closes observations before the tool has actually run.
       return undefined;
     }
     case 'tool_execution_start':
@@ -194,7 +175,20 @@ export class PiRuntimeSession implements RuntimeSession {
     for (const listener of this.listeners) listener(event);
   }
 
+  private preflight(input: RuntimeInput): void {
+    const activeTools = new Set(this.session.getActiveToolNames());
+    enforcePiStartupBudget({
+      systemPrompt: this.session.systemPrompt,
+      userPrompt: input.text,
+      tools: this.session
+        .getAllTools()
+        .filter((tool) => activeTools.has(tool.name)),
+      contextWindow: this.session.model?.contextWindow ?? 0,
+    });
+  }
+
   async prompt(input: RuntimeInput): Promise<void> {
+    this.preflight(input);
     await this.session.prompt(input.text, {
       images: input.images
         ?.filter((image) => !!image.mimeType)
@@ -207,10 +201,12 @@ export class PiRuntimeSession implements RuntimeSession {
   }
 
   async steer(input: RuntimeInput): Promise<void> {
+    this.preflight(input);
     await this.session.steer(input.text);
   }
 
   async followUp(input: RuntimeInput): Promise<void> {
+    this.preflight(input);
     await this.session.followUp(input.text);
   }
 

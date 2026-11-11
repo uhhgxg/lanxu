@@ -86,3 +86,4 @@ nohup.out
 auth.json
 models.json
 .pi/
+/tmp/test-cache/

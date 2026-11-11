@@ -7,6 +7,11 @@ import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { WebSocketServer, WebSocket } from 'ws';
 import crypto from 'crypto';
+import {
+  observeAgentStream,
+  shutdownAgentObservability,
+  finishObservedRun,
+} from './agent-observability.js';
 import { TerminalManager } from './terminal-manager.js';
 import { resolveFeishuCliBoundAccountId } from './feishu-cli-runtime.js';
 
@@ -2942,6 +2947,7 @@ export function broadcastStreamEvent(
     );
     return;
   }
+  observeAgentStream(snapshotJid, event, agentId);
   const msg: WsMessageOut = agentId
     ? {
         type: 'stream_event',
@@ -3179,6 +3185,7 @@ export function broadcastRunFinished(
   const jid = normalizeRuntimeJid(chatJid);
   const allowedUserIds = getGroupAllowedUserIds(baseJid);
   const current = activeLogicalRuns.get(jid);
+  finishObservedRun(jid, runId, reason);
 
   // Always publish the exact terminal event so clients can fence it. Only
   // mutate server-side projection when it still belongs to this attempt.
@@ -3342,6 +3349,9 @@ export function shutdownTerminals(): void {
 }
 
 export async function shutdownWebServer(): Promise<void> {
+  await shutdownAgentObservability().catch((err) =>
+    logger.warn({ err }, 'Trace shutdown failed'),
+  );
   if (statusInterval) {
     clearInterval(statusInterval);
     statusInterval = null;
